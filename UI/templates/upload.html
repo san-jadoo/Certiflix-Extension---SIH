@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Product Form</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-image: url("UPLOAD.jpg");
+            background-size: cover;
+            background-position: center;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column; /* Change to column direction */
+            align-items: center;
+        }
+
+        #container {
+            background-color: rgba(255, 255, 255, 0.9);
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+            border-radius: 15px;
+            overflow: auto; /* Enable scrolling */
+            max-height: 100vh; /* Set a maximum height for the container */
+            margin: 50px;
+            padding: 20px;
+        }
+
+        h1 {
+            font-family: 'Cambria';
+            font-size: 2rem;
+            text-align: center;
+            margin-top: 20px;
+            margin-bottom: 30px;
+            color: #333;
+            text-shadow: 2px 2px #fff;
+        }
+
+        form {
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 10px;
+            color: #333;
+        }
+
+        input[type="text"], textarea, input[type="file"] {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 20px;
+            box-sizing: border-box;
+            font-size: 16px;
+            color: #333;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+
+        textarea {
+            resize: vertical;
+        }
+
+        img {
+            max-width: 100%;
+            height: auto;
+            margin-bottom: 20px;
+        }
+
+        input[type="submit"], input[type="button"] {
+            background-color: #333;
+            color: #fff;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            font-size: 16px;
+            cursor: pointer;
+            margin-right: 10px;
+        }
+
+        input[type="submit"]:hover, input[type="button"]:hover {
+            background-color: #666;
+        }
+
+        #preview-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            justify-content: center;
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div id="container">
+        <h1>Upload Product Details</h1>
+        <label for="name">Product Name:</label>
+        <input type="text" id="name" name="name" placeholder="Enter product name">
+
+        <label for="description">Product Description:</label>
+        <textarea id="description" name="description" placeholder="Enter product description"></textarea>
+
+        <label for="images">Product Image (Image Size Supported - (832*832)) :</label>
+        <input type="file" id="images" name="images" multiple accept="image/*">
+
+        <div id="preview-container"></div>
+
+        <input type="submit" id="submit" value="Submit">
+        <input type="button" value="Back" onclick="history.back()">
+    
+        <script type="module">
+            import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+            import { getStorage, ref as sRef, uploadBytesResumable, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-storage.js";
+            import { getDatabase, ref, set } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+        
+            const firebaseConfig = {
+                apiKey: "AIzaSyAFhcQBJw7090-fJaR0K7BeVPnlRnKrYwM",
+                authDomain: "authentication-7890b.firebaseapp.com",
+                databaseURL: "https://authentication-7890b-default-rtdb.firebaseio.com",
+                projectId: "authentication-7890b",
+                storageBucket: "authentication-7890b.appspot.com",
+                messagingSenderId: "527223083634",
+                appId: "1:527223083634:web:4b45065de2e93a1be4e8eb"
+            };
+            const app = initializeApp(firebaseConfig);
+            const realdb = getDatabase(app);
+        
+            const imageInput = document.getElementById('images');
+        
+            imageInput.addEventListener('change', function (event) {
+                const previewContainer = document.getElementById('preview-container');
+                previewContainer.innerHTML = '';
+        
+                for (let i = 0; i < event.target.files.length; i++) {
+                    const preview = document.createElement('img');
+                    preview.src = URL.createObjectURL(event.target.files[i]);
+                    preview.alt = 'Product Image';
+                    preview.style.maxWidth = '100%';
+                    preview.style.height = 'auto';
+                    preview.style.marginBottom = '20px';
+                    previewContainer.appendChild(preview);
+                }
+            });
+        
+            const submitButton = document.getElementById('submit');
+        
+            submitButton.addEventListener('click', function () {
+                const fileInput = imageInput.files[0];
+        
+                if (fileInput) {
+                    const formData = new FormData();
+                    formData.append('image', fileInput);
+                    formData.append('name', document.getElementById('name').value);
+                    formData.append('description', document.getElementById('description').value);
+        
+                    console.log(fileInput.name);
+        
+                    fetch('http://127.0.0.1:5000/receive-image', {
+                        method: 'POST',
+                        body: formData,
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        console.log(data);
+                        if (data.status === 'success') {
+                            alert("Success");
+                            uploadImage(fileInput);
+                        } else if (data.status === 'partial1') {
+                            alert(`Logo Verification Failed!! Not Verified - Fake Logo or Logo doesn't exist!`);
+                        } else if (data.status === 'partial2') {
+                            alert(`Logo Verification Failed!! Not Verified - Product and Logo Mismatched!!`);
+                        } else if (data.status === 'partial3') {
+                            alert(`Description Verification Failed!! Verified -  Product and Description Mismatched!!`);
+                        } else if (data.status === 'failed') {
+                            alert(`Product Verification Failed, Verified - Wrong Product `);
+                        } else {
+                            alert('Failed to predict product.');
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                    });
+                } else {
+                    console.error('No file selected');
+                }
+            });
+        
+            function uploadImage(file) {
+                const storage = getStorage(app);
+                const storageRef = sRef(storage, `images/${file.name}`);
+                const uploadTask = uploadBytesResumable(storageRef, file);
+        
+                uploadTask.on('state_changed',
+                    (snapshot) => {
+                        const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+                        console.log('Upload Progress:', progress + '%');
+                    },
+                    (error) => {
+                        console.error('Error uploading image:', error);
+                    },
+                    () => {
+                        getDownloadURL(uploadTask.snapshot.ref).then((downloadURL) => {
+                            console.log('File available at', downloadURL);
+                            saveURLtoRealtimeDB(downloadURL);
+                            alert('Image uploaded successfully!');
+                        });
+                    }
+                );
+            }
+        
+            function saveURLtoRealtimeDB(URL) {
+                const pname = document.getElementById('name').value;
+                const description = document.getElementById('description').value;
+        
+                set(ref(realdb, `ImagesLinks/${pname}`), {
+                    ImageName: pname,
+                    ImageUrl: URL,
+                    ImageDescription: description
+                });
+            }
+        </script>
+ </div>
+</body>
+</html>

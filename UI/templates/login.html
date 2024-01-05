@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login Form</title>
+    <link rel="icon" href="logbg.jpg" type="image/x-icon">
+    <!-- Add Bootstrap CSS -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            height: 100vh;
+            background: url('logbg.jpg') center/cover no-repeat fixed;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding-top: 100px;
+            padding-left: 250px;
+        }
+
+        .login-container {
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 30px;
+            background-color: rgba(255, 165, 0, 0.9);
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            width: 300px;
+            text-align: center;
+        }
+
+        .login-container h2 {
+            margin-bottom: 20px;
+        }
+
+        .login-container input {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 15px;
+            box-sizing: border-box;
+        }
+
+        .login-container button {
+            background-color: black;
+            color: #fff;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        .login-container button:hover {
+            background-color: blue;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="container">
+        <div class="row justify-content-center align-items-center vh-100">
+            <div class="col-md-6">
+                <div class="login-container">
+                    <h2>Sign in</h2>
+                    <div>
+                        <!-- Add id="loginButton" to your login button element -->
+                        <input type="email" id="email" class="form-control" placeholder="Email" required>
+                        <br>
+                        <input type="password" id="password" class="form-control" placeholder="Password" required>
+                        <br>
+                        <button type="button" id="loginButton" class="btn btn-dark btn-block">Login</button>
+
+                        <button type="button" id="registerButton" class="btn btn-secondary btn-block">Register</button>
+                        <br>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add Bootstrap JS dependencies (jQuery, Popper.js, Bootstrap JS) -->
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <script type="module">
+        // Import the functions you need from the SDKs you need
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+        import { getDatabase, set, ref, update } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+        import { getAuth, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+        
+        // Your web app's Firebase configuration
+        const firebaseConfig = {
+          apiKey: "AIzaSyAFhcQBJw7090-fJaR0K7BeVPnlRnKrYwM",
+          authDomain: "authentication-7890b.firebaseapp.com",
+          databaseURL: "https://authentication-7890b-default-rtdb.firebaseio.com",
+          projectId: "authentication-7890b",
+          storageBucket: "authentication-7890b.appspot.com",
+          messagingSenderId: "527223083634",
+          appId: "1:527223083634:web:4b45065de2e93a1be4e8eb"
+        };
+        
+        // Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+        const database = getDatabase(app);
+        const auth = getAuth();
+    
+        //document.addEventListener('DOMContentLoaded', function() {
+        document.getElementById('loginButton').addEventListener('click', (e) => {
+        var email = document.getElementById("email").value;
+        var password = document.getElementById("password").value;
+    
+        signInWithEmailAndPassword(auth, email, password)
+        .then((userCredential) => {
+          const user = userCredential.user;
+          const t1 = new Date();
+          update(ref(database, 'users/' + user.uid), {
+            last_login: t1
+          });
+          sessionStorage.setItem("email", email);
+          sessionStorage.setItem("isLoggedIn", "true");
+          alert('user logged in');
+
+           window.location.href = 'dashboard.html';
+        })
+        .catch((error) => {
+          const errorCode = error.code;
+          const errorMessage = error.message;
+          alert(errorMessage);
+        });
+    });
+    registerButton.addEventListener('click', () => {
+        // Redirect to the login page (adjust the URL accordingly)
+        window.location.href = 'register.html';
+  });
+      </script>
+</body>
+
+</html>

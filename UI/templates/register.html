@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Register Form</title>
+  <link rel="icon" href="shopping.png" type="image/x-icon">
+  <!-- Add Bootstrap CSS -->
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+  <link rel="stylesheet" href="register.css">
+  <script src="register.js" defer></script>
+  <style>
+    body{
+      background-image: url("tc.jpg");
+    }
+  </style>
+</head>
+
+<body class="bg-light">
+  <div class="container">
+    <div class="row justify-content-end align-items-center vh-100">
+      <div class="col-md-6">
+        <div class="login-container bg-white p-4 rounded">
+          <h2 class="mb-4">Sign Up</h2>
+          <form>
+            <div class="form-group">
+              <input type="text" class="form-control" id="first_name" placeholder="First Name" required>
+            </div>
+            <div class="form-group">
+              <input type="text" class="form-control" id="last_name" placeholder="Last Name" required>
+            </div>
+            <div class="form-group">
+              <input type="email" class="form-control" id="email" placeholder="Email" required>
+            </div>
+            <div class="form-group">
+              <input type="text" class="form-control" id="phone" placeholder="Phone Number" required>
+            </div>
+            <div class="form-group">
+              <input type="text" class="form-control" id="org" placeholder="Organization Name" required>
+            </div>
+            <div class="form-group">
+              <input type="text" class="form-control" id="address" placeholder="Address" required>
+            </div>
+            <div class="form-group">
+              <input type="text" class="form-control" id="pincode" placeholder="Pincode" required>
+            </div>
+            <div class="form-group">
+              <input type="password" class="form-control" id="password" placeholder="Password" required>
+            </div>
+            <div class="form-group">
+              <input type="password" class="form-control" id="confirm_password" placeholder="Confirm Password"
+                required>
+            </div>
+            <button type="button" id="loginButton" class="btn btn-dark btn-block">Register</button>
+            <!-- Add the back button -->
+            <button type="button" id="backButton" class="btn btn-secondary btn-block mt-2">Back to Login</button>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Add Bootstrap JS dependencies (jQuery, Popper.js, Bootstrap JS) -->
+  <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js"></script>
+  <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+</body>
+
+<script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+      import { getDatabase,set,ref } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+      import { getAuth, createUserWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js"
+      // TODO: Add SDKs for Firebase products that you want to use
+      // https://firebase.google.com/docs/web/setup#available-libraries
+    
+      // Your web app's Firebase configuration
+      const firebaseConfig = {
+      apiKey: "AIzaSyAFhcQBJw7090-fJaR0K7BeVPnlRnKrYwM",
+      authDomain: "authentication-7890b.firebaseapp.com",
+      databaseURL: "https://authentication-7890b-default-rtdb.firebaseio.com",
+      projectId: "authentication-7890b",
+      storageBucket: "authentication-7890b.appspot.com",
+      messagingSenderId: "527223083634",
+      appId: "1:527223083634:web:4b45065de2e93a1be4e8eb"
+  };
+     
+      // Initialize Firebase
+      const app = initializeApp(firebaseConfig);
+      const database = getDatabase(app);
+      const auth = getAuth();
+      
+      loginButton.addEventListener('click',(e) => {
+        var first_name = document.getElementById("first_name").value;
+        var last_name = document.getElementById("last_name").value;
+        var email = document.getElementById("email").value;
+        var phone = document.getElementById("phone").value; 
+        var org = document.getElementById("org").value;
+        var address = document.getElementById("address").value;
+        var pincode = document.getElementById("pincode").value;
+        var password = document.getElementById("password").value;
+        var confirm_password = document.getElementById("confirm_password").value;
+  
+      createUserWithEmailAndPassword(auth, email, password)
+        .then((userCredential) => {
+        // Signed up 
+        const user = userCredential.user;
+        set(ref(database,'users/' + phone),{
+             first_name:first_name,
+             last_name:last_name,
+             email:email,
+             org:org,
+             address:address,
+             pincode:pincode,
+             phone :phone
+          })
+        alert('user created');
+      })
+      .catch((error) => {
+        const errorCode = error.code;
+        const errorMessage = error.message;
+        // .. 
+        alert(error.message);
+      });
+    });
+    backButton.addEventListener('click', () => {
+          // Redirect to the login page (adjust the URL accordingly)
+          window.location.href = 'login.html';
+    });
+  </script>
+
+</html>
